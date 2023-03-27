@@ -44,6 +44,7 @@ type rpcRequest struct {
 
 // FlashbotsRPC - Ethereum rpc client
 type FlashbotsRPC struct {
+	id      int
 	url     string
 	client  httpClient
 	log     logger
@@ -55,6 +56,7 @@ type FlashbotsRPC struct {
 // New create new rpc client with given url
 func New(url string, options ...func(rpc *FlashbotsRPC)) *FlashbotsRPC {
 	rpc := &FlashbotsRPC{
+		id:      1,
 		url:     url,
 		log:     log.New(os.Stderr, "", log.LstdFlags),
 		Headers: make(map[string]string),
@@ -95,11 +97,12 @@ func (rpc *FlashbotsRPC) URL() string {
 // Call returns raw response of method call
 func (rpc *FlashbotsRPC) Call(method string, params ...interface{}) (json.RawMessage, error) {
 	request := rpcRequest{
-		ID:      1,
+		ID:      rpc.id,
 		JSONRPC: "2.0",
 		Method:  method,
 		Params:  params,
 	}
+	rpc.id++
 
 	body, err := json.Marshal(request)
 	if err != nil {
@@ -149,11 +152,12 @@ func (rpc *FlashbotsRPC) Call(method string, params ...interface{}) (json.RawMes
 // CallWithFlashbotsSignature is like Call but also signs the request
 func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecdsa.PrivateKey, params ...interface{}) (json.RawMessage, error) {
 	request := rpcRequest{
-		ID:      1,
+		ID:      rpc.id,
 		JSONRPC: "2.0",
 		Method:  method,
 		Params:  params,
 	}
+	rpc.id++
 
 	body, err := json.Marshal(request)
 	if err != nil {
